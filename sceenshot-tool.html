@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Desktop Screenshot Tool</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 700px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #3498db;
+            color: white;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        img {
+            margin-top: 20px;
+            max-width: 100%;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🖥️ Desktop Screenshot Tool</h2>
+    <p>Capture your entire screen, window, or browser tab</p>
+
+    <button onclick="takeDesktopScreenshot()">Take Desktop Screenshot</button>
+
+    <div id="result"></div>
+</div>
+
+<script>
+async function takeDesktopScreenshot() {
+    try {
+        // Ask user to select screen
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+            video: { cursor: "always" },
+            audio: false
+        });
+
+        const video = document.createElement("video");
+        video.srcObject = stream;
+
+        video.onloadedmetadata = () => {
+            video.play();
+
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Stop screen sharing
+            stream.getTracks().forEach(track => track.stop());
+
+            const image = canvas.toDataURL("image/png");
+
+            const img = document.createElement("img");
+            img.src = image;
+
+            const link = document.createElement("a");
+            link.href = image;
+            link.download = "desktop-screenshot.png";
+            link.innerText = "⬇ Download Screenshot";
+            link.style.display = "block";
+            link.style.marginTop = "10px";
+
+            const result = document.getElementById("result");
+            result.innerHTML = "";
+            result.appendChild(img);
+            result.appendChild(link);
+        };
+
+    } catch (err) {
+        alert("Screen capture cancelled or not allowed.");
+    }
+}
+</script>
+
+</body>
+</html>
